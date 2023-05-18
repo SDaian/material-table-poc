@@ -15,6 +15,6 @@ export class DataService {
   constructor(private http: HttpClient) {}
 
   getData(): Observable<User[]> {
-    return this.http.get<User[]>('https://jsonplaceholder.typicode.com/users');
+    return this.http.get<User[]>('https://jsonplaceholder.typicode.com/comments');
   }
 }

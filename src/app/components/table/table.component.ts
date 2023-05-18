@@ -10,7 +10,6 @@ import {
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
-import { User } from '../../services/data.service';
 
 export interface TableColumn {
   name: string;
@@ -42,12 +41,10 @@ export class TableComponent implements OnInit, AfterViewInit {
   @Output() rowAction: EventEmitter<any> = new EventEmitter<any>();
 
   // this property needs to have a setter, to dynamically get changes from parent component
-  @Input() set tableData(data: User[] | null | undefined) {
+  @Input() set tableData(data: any[] | null) {
     if (data === undefined || data === null) return;
     this.setTableDataSource(data);
   }
-
-  constructor() {}
 
   ngOnInit(): void {
     const columnNames = this.tableColumns.map(
