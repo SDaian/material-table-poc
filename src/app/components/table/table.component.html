@@ -10,7 +10,7 @@
   <!-- Table -->
   <table
     mat-table
-    [dataSource]="tableDataSource"
+    [dataSource]="datasource"
     matSort
     (matSortChange)="sortTable($event)"
   >
@@ -28,8 +28,9 @@
         </button>
       </td>
     </ng-container>
+    <ng-content></ng-content>
     <ng-container
-      *ngFor="let tableColumn of tableColumns"
+      *ngFor="let tableColumn of columns"
       [matColumnDef]="tableColumn.name"
     >
       <!-- if sortable column header -->
@@ -65,9 +66,9 @@
         {{ element | dataPropertyGetter : tableColumn.dataKey }}
       </td>
     </ng-container>
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-  </table>
+    <!-- <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr> -->
+    </table>
 
   <!-- Pagination -->
   <mat-paginator

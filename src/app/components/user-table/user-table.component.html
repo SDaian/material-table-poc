@@ -1,5 +1,14 @@
-<app-custom-table
-  [tableData]="(users$ | async)"
-  [tableColumns]="userColumns"
-  [isPageable]="true"
-></app-custom-table>
+<div class="container">
+  <app-custom-table
+    [columns]="userColumns"
+    [datasource]="(users$ | async) ?? dataSource"
+    [isPageable]="true"
+  >
+    <ng-container matColumnDef="body">
+      <th mat-header-cell *matHeaderCellDef>Body</th>
+      <td mat-cell *matCellDef="let element">{{ element.id > 20 ? 'daian' : 'scuarissi' }}</td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </app-custom-table>
+</div>

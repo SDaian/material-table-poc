@@ -1,15 +1,17 @@
 import {
-  AfterViewInit,
+  AfterContentInit,
   Component,
+  ContentChild,
+  ContentChildren,
   EventEmitter,
   Input,
-  OnInit,
   Output,
+  QueryList,
   ViewChild,
 } from '@angular/core';
-import { MatSort, Sort } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatSort, Sort } from '@angular/material/sort';
+import { MatColumnDef, MatHeaderRowDef, MatNoDataRow, MatRowDef, MatTable, MatTableDataSource } from '@angular/material/table';
 
 export interface TableColumn {
   name: string;
@@ -23,7 +25,7 @@ export interface TableColumn {
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
 })
-export class TableComponent implements OnInit, AfterViewInit {
+export class TableComponent<T> implements AfterContentInit {
   public tableDataSource = new MatTableDataSource([]);
   public displayedColumns!: string[];
   @ViewChild(MatPaginator, { static: false }) matPaginator!: MatPaginator;
@@ -32,7 +34,7 @@ export class TableComponent implements OnInit, AfterViewInit {
   @Input() isPageable = false;
   @Input() isSortable = false;
   @Input() isFilterable = false;
-  @Input() tableColumns: TableColumn[] = [];
+  // @Input() tableColumns: TableColumn[] = [];
   @Input() rowActionIcon!: string;
   @Input() paginationSizes: number[] = [5, 10, 15];
   @Input() defaultPageSize = this.paginationSizes[1];
@@ -41,25 +43,51 @@ export class TableComponent implements OnInit, AfterViewInit {
   @Output() rowAction: EventEmitter<any> = new EventEmitter<any>();
 
   // this property needs to have a setter, to dynamically get changes from parent component
-  @Input() set tableData(data: any[] | null) {
-    if (data === undefined || data === null) return;
-    this.setTableDataSource(data);
-  }
+  // @Input() set tableData(data: any[] | null) {
+  //   if (data === undefined || data === null) return;
+  //   this.setTableDataSource(data);
+  // }
 
-  ngOnInit(): void {
-    const columnNames = this.tableColumns.map(
-      (tableColumn: TableColumn) => tableColumn.name
-    );
-    if (this.rowActionIcon) {
-      this.displayedColumns = [this.rowActionIcon, ...columnNames];
-    } else {
-      this.displayedColumns = columnNames;
-    }
-  }
+  @Input() tableData: T[] = [];
+
+  // ngOnInit(): void {
+  //   const columnNames = this.tableColumns.map(
+  //     (tableColumn: TableColumn) => tableColumn.name
+  //   );
+  //   if (this.rowActionIcon) {
+  //     this.displayedColumns = [this.rowActionIcon, ...columnNames];
+  //   } else {
+  //     this.displayedColumns = columnNames;
+  //   }
+  // }
 
   // we need this, in order to make pagination work with *ngIf
-  ngAfterViewInit(): void {
-    this.tableDataSource.paginator = this.matPaginator;
+  // ngAfterViewInit(): void {
+  //   this.tableDataSource.paginator = this.matPaginator;
+  // }
+
+  @ContentChildren(MatHeaderRowDef)
+  headerRowDefs!: QueryList<MatHeaderRowDef>;
+  @ContentChildren(MatRowDef)
+  rowDefs!: QueryList<MatRowDef<T>>;
+  @ContentChildren(MatColumnDef)
+  columnDefs!: QueryList<MatColumnDef>;
+  @ContentChild(MatNoDataRow)
+  noDataRow!: MatNoDataRow;
+
+  @ViewChild(MatTable, { static: true })
+  table!: MatTable<T>;
+
+  @Input() columns!: TableColumn[];
+  @Input() datasource!: MatTableDataSource<T>;
+
+  ngAfterContentInit() {
+    this.columnDefs.forEach((columnDef) => this.table.addColumnDef(columnDef));
+    this.rowDefs.forEach((rowDef) => this.table.addRowDef(rowDef));
+    this.headerRowDefs.forEach((headerRowDef) =>
+      this.table.addHeaderRowDef(headerRowDef)
+    );
+    // this.table.setNoDataRow(this.noDataRow);
   }
 
   setTableDataSource(data: any) {
@@ -76,7 +104,7 @@ export class TableComponent implements OnInit, AfterViewInit {
   sortTable(sortParameters: Sort) {
     // defining name of data property, to sort by, instead of column name
     sortParameters.active =
-      this.tableColumns.find((column) => column.name === sortParameters.active)
+      this.columns.find((column) => column.name === sortParameters.active)
         ?.dataKey ?? '';
     this.sort.emit(sortParameters);
   }
